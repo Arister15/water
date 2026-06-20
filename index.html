@@ -2,107 +2,194 @@
 <html lang="el">
 <head>
     <meta charset="UTF-8">
-    
-    <!-- 1. Κλείδωμα του ζουμ για κινητά συσκευές -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
-    <title>My Mobile Web App</title>
-    
+    <title>Water Tracker</title>
     <style>
-        /* 2. Απενεργοποίηση του double-tap zoom μέσω CSS */
-        html, body {
-            margin: 0;
-            padding: 0;
-            touch-action: manipulation; /* Αυτό σταματάει το double-tap zoom */
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #f0f2f5;
-            color: #333;
+        :root {
+            --primary-color: #007aff;
+            --bg-bottle: rgba(0, 122, 255, 0.1);
+            --water-color: rgba(0, 122, 255, 0.6);
         }
 
-        /* --- Στυλ για τη δοκιμή (Μπορείς να τα αλλάξεις/διαγράψεις) --- */
-        .container {
-            padding: 20px;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .info-box {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
-        }
-
-        /* Αυτό το box δημιουργεί μεγάλο ύψος για να μπορείς να κάνεις scroll */
-        .spacer {
-            height: 1200px; 
-            background: linear-gradient(180deg, #3498db, #2ecc71);
-            margin: 20px 0;
-            border-radius: 12px;
+        /* touch-action: manipulation για να μην κάνει zoom στο double-tap */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f5f5f7;
             display: flex;
-            align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 20px;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+            touch-action: manipulation;
+            user-select: none; /* Αποτρέπει την τυχαία επιλογή κειμένου */
+            -webkit-user-select: none;
+        }
+
+        .app-container {
+            background-color: white;
+            width: 100%;
+            max-width: 400px;
+            height: 100vh;
+            max-height: 850px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 40px 20px;
+            box-sizing: border-box;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border-radius: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        /* Το Μπουκάλι */
+        .bottle {
+            width: 160px;
+            height: 350px;
+            border: 4px solid var(--primary-color);
+            border-radius: 35px;
+            position: relative;
+            background-color: var(--bg-bottle);
+            overflow: hidden;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+        }
+
+        .water {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0%; 
+            background-color: var(--water-color);
+            transition: height 0.4s ease-in-out;
+        }
+
+        /* Ενδείξεις */
+        .stats {
+            text-align: center;
+        }
+
+        .ml-text {
+            font-size: 1.5rem;
             font-weight: bold;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+            margin: 0;
+        }
+
+        .l-text {
+            font-size: 1rem;
+            color: #8e8e93;
+            margin: 5px 0 0 0;
+        }
+
+        /* Κουμπιά */
+        .buttons-container {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            flex: 1;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+            opacity: 0.9;
+        }
+
+        .reset-btn {
+            background: none;
+            border: none;
+            color: #ff3b30;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 10px;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        
-        <div class="info-box">
-            <h2>Το Mobile App μου 📱</h2>
-            <p><strong>Δοκιμή Ζουμ:</strong> Πάτα γρήγορα δύο φορές (double-tap) οπουδήποτε. Δεν θα κάνει ζουμ!</p>
-            <p><strong>Δοκιμή Αποθήκευσης:</strong> Κάνε scroll προς τα κάτω, βγες από το app (πήγαινε στην αρχική οθόνη του κινητού σου) και ξαναμπές.</p>
+    <div class="app-container">
+        <h1>Water Tracker</h1>
+
+        <div class="bottle">
+            <div class="water" id="waterLayer"></div>
         </div>
 
-        <!-- Διακοσμητικό box για να υπάρχει scrollbar -->
-        <div class="spacer">
-            Κάνε Scroll προς τα κάτω... 👇
+        <div class="stats">
+            <p class="ml-text" id="mlDisplay">0 / 3000 ml</p>
+            <p class="l-text" id="lDisplay">0.00 / 3.0 L</p>
         </div>
 
-        <div class="info-box">
-            <h3>Έφτασες στο τέλος! ✨</h3>
-            <p>Αν βγεις από το app ενώ είσαι σε αυτό το σημείο, όταν ξαναανοίξει θα σε φέρει κατευθείαν εδώ αυτόματα.</p>
+        <div class="buttons-container">
+            <button class="btn" onclick="addWater(250)">+250 ml</button>
+            <button class="btn" onclick="addWater(500)">+500 ml</button>
         </div>
 
+        <button class="reset-btn" onclick="resetWater()">Επαναφορά</button>
     </div>
 
-    <!-- 3. Το JavaScript για την αποθήκευση της θέσης -->
     <script>
-        // --- ΑΠΟΘΗΚΕΥΣΗ: Όταν ο χρήστης βγαίνει από το app ---
-        document.addEventListener("visibilitychange", () => {
-            if (document.visibilityState === "hidden") {
-                
-                const appState = {
-                    scrollPosition: window.scrollY // Σώζουμε το πόσο κάτω έχει κάνει scroll
-                };
+        // Φόρτωση αποθηκευμένων δεδομένων (αν υπάρχουν), αλλιώς ξεκινάει από το 0
+        let currentIntake = parseInt(localStorage.getItem('waterIntake')) || 0;
+        const maxCapacity = 3000;
 
-                // Αποθήκευση στη μνήμη του browser (LocalStorage)
-                localStorage.setItem("saved_app_state", JSON.stringify(appState));
+        const waterLayer = document.getElementById('waterLayer');
+        const mlDisplay = document.getElementById('mlDisplay');
+        const lDisplay = document.getElementById('lDisplay');
+
+        // Αρχική ενημέρωση της οθόνης με τα αποθηκευμένα δεδομένα κατά το άνοιγμα
+        updateUI();
+
+        function updateUI() {
+            const percentage = Math.min((currentIntake / maxCapacity) * 100, 100);
+            waterLayer.style.height = percentage + '%';
+
+            mlDisplay.innerText = `${currentIntake} / ${maxCapacity} ml`;
+            lDisplay.innerText = `${(currentIntake / 1000).toFixed(2)} / 3.0 L`;
+        }
+
+        function addWater(amount) {
+            if (currentIntake + amount <= maxCapacity) {
+                currentIntake += amount;
+            } else {
+                currentIntake = maxCapacity;
             }
-        });
-
-        // --- ΕΠΑΝΑΦΟΡΑ: Όταν ο χρήστης ξαναμπαίνει στο app ---
-        window.addEventListener("DOMContentLoaded", () => {
-            const rawData = localStorage.getItem("saved_app_state");
             
-            if (rawData) {
-                const appState = JSON.parse(rawData);
-                
-                if (appState.scrollPosition !== undefined) {
-                    // Δίνουμε 100ms χρόνο στον browser να φορτώσει τη σελίδα πριν κάνει το scroll
-                    setTimeout(() => {
-                        window.scrollTo(0, appState.scrollPosition);
-                    }, 100);
-                }
-            }
-        });
-    </script>
+            // Αποθήκευση της νέας τιμής
+            localStorage.setItem('waterIntake', currentIntake);
+            updateUI();
+        }
 
+        function resetWater() {
+            currentIntake = 0;
+            // Μηδενισμός και στην αποθήκευση
+            localStorage.setItem('waterIntake', currentIntake);
+            updateUI();
+        }
+    </script>
 </body>
 </html>
