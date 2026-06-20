@@ -1,112 +1,182 @@
-import SwiftUI
-
-struct ContentView: View {
-    // Μεταβλητή για το πόσο νερό έχει πιει ο χρήστης
-    @State private var currentIntake: Int = 0
-    // Το όριο των 3 λίτρων σε χιλιοστόλιτρα (ml)
-    let maxCapacity: Int = 3000 
-    
-    // Υπολογισμός του ποσοστού για το γέμισμα του μπουκαλιού
-    var progress: CGFloat {
-        return CGFloat(currentIntake) / CGFloat(maxCapacity)
-    }
-    
-    var body: some View {
-        VStack(spacing: 30) {
-            // Τίτλος
-            Text("Water Tracker")
-                .font(.largeTitle)
-                .bold()
-                .foregroundColor(.blue)
-                .padding(.top, 40)
-            
-            // Το Ψηφιακό Μπουκάλι
-            ZStack(alignment: .bottom) {
-                // Το background του μπουκαλιού (άδειο)
-                RoundedRectangle(cornerRadius: 30)
-                    .fill(Color.blue.opacity(0.1))
-                    .frame(width: 160, height: 350)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 30)
-                            .stroke(Color.blue, lineWidth: 4)
-                    )
-                
-                // Το νερό που γεμίζει το μπουκάλι
-                RoundedRectangle(cornerRadius: 26)
-                    .fill(Color.blue.opacity(0.6))
-                    .frame(width: 152, height: 342 * min(progress, 1.0))
-                    .padding(4)
-                    .animation(.easeInOut(duration: 0.4), value: currentIntake)
-            }
-            
-            // Ενδείξεις Ποσότητας
-            VStack(spacing: 5) {
-                Text("\(currentIntake) / \(maxCapacity) ml")
-                    .font(.title2)
-                    .bold()
-                
-                Text(String(format: "%.2f / 3.0 L", Double(currentIntake) / 1000.0))
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
-            
-            // Κουμπιά Προσθήκης Νερού
-            HStack(spacing: 20) {
-                Button(action: {
-                    addWater(amount: 250)
-                }) {
-                    Text("+250 ml")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.blue)
-                        .cornerRadius(15)
-                }
-                
-                Button(action: {
-                    addWater(amount: 500)
-                }) {
-                    Text("+500 ml")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.blue)
-                        .cornerRadius(15)
-                }
-            }
-            .padding(.horizontal, 30)
-            
-            Spacer()
-            
-            // Κουμπί Reset
-            Button(action: {
-                currentIntake = 0
-            }) {
-                Text("Επαναφορά")
-                    .font(.body)
-                    .bold()
-                    .foregroundColor(.red)
-                    .padding()
-            }
-            .padding(.bottom, 20)
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Tracker</title>
+    <style>
+        :root {
+            --primary-color: #007aff;
+            --bg-bottle: rgba(0, 122, 255, 0.1);
+            --water-color: rgba(0, 122, 255, 0.6);
         }
-    }
-    
-    // Συνάρτηση για την προσθήκη νερού χωρίς να ξεπερνάει το όριο
-    func addWater(amount: Int) {
-        if currentIntake + amount <= maxCapacity {
-            currentIntake += amount
-        } else {
-            currentIntake = maxCapacity // Σταματάει στα 3000ml
-        }
-    }
-}
 
-// Προεπισκόπηση για το Xcode
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
-    }
-}
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f5f5f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+
+        .app-container {
+            background-color: white;
+            width: 100%;
+            max-width: 400px;
+            height: 100vh;
+            max-height: 850px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 40px 20px;
+            box-sizing: border-box;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            border-radius: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        /* Το Μπουκάλι */
+        .bottle {
+            width: 160px;
+            height: 350px;
+            border: 4px solid var(--primary-color);
+            border-radius: 35px;
+            position: relative;
+            background-color: var(--bg-bottle);
+            overflow: hidden;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+        }
+
+        .water {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0%; /* Αλλάζει με JS */
+            background-color: var(--water-color);
+            transition: height 0.4s ease-in-out;
+        }
+
+        /* Ενδείξεις */
+        .stats {
+            text-align: center;
+        }
+
+        .ml-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .l-text {
+            font-size: 1rem;
+            color: #8e8e93;
+            margin: 5px 0 0 0;
+        }
+
+        /* Κουμπιά */
+        .buttons-container {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            flex: 1;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+            opacity: 0.9;
+        }
+
+        .reset-btn {
+            background: none;
+            border: none;
+            color: #ff3b30;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 10px;
+            -webkit-tap-highlight-color: transparent;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <h1>Water Tracker</h1>
+
+        <div class="bottle">
+            <div class="water" id="waterLayer"></div>
+        </div>
+
+        <div class="stats">
+            <p class="ml-text" id="mlDisplay">0 / 3000 ml</p>
+            <p class="l-text" id="lDisplay">0.00 / 3.0 L</p>
+        </div>
+
+        <div class="buttons-container">
+            <button class="btn" onclick="addWater(250)">+250 ml</button>
+            <button class="btn" onclick="addWater(500)">+500 ml</button>
+        </div>
+
+        <button class="reset-btn" onclick="resetWater()">Επαναφορά</button>
+    </div>
+
+    <script>
+        let currentIntake = 0;
+        const maxCapacity = 3000;
+
+        const waterLayer = document.getElementById('waterLayer');
+        const mlDisplay = document.getElementById('mlDisplay');
+        const lDisplay = document.getElementById('lDisplay');
+
+        function updateUI() {
+            // Υπολογισμός ποσοστού ύψους
+            const percentage = Math.min((currentIntake / maxCapacity) * 100, 100);
+            waterLayer.style.height = percentage + '%';
+
+            // Ενημέρωση κειμένων
+            mlDisplay.innerText = `${currentIntake} / ${maxCapacity} ml`;
+            lDisplay.innerText = `${(currentIntake / 1000).toFixed(2)} / 3.0 L`;
+        }
+
+        function addWater(amount) {
+            if (currentIntake + amount <= maxCapacity) {
+                currentIntake += amount;
+            } else {
+                currentIntake = maxCapacity;
+            }
+            updateUI();
+        }
+
+        function resetWater() {
+            currentIntake = 0;
+            updateUI();
+        }
+    </script>
+</body>
+</html>
