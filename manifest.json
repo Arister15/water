@@ -1,0 +1,18 @@
+{
+  "name": "Θάρρος ή Αλήθεια;",
+  "short_name": "Θάρρος/Αλήθεια",
+  "description": "Παιχνίδι Θάρρος ή Αλήθεια για δύο",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0b090d",
+  "theme_color": "#0b090d",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "logotd.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
