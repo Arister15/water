@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <radialGradient id="bgGrad" cx="50%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#1f1024" />
+      <stop offset="100%" stop-color="#09070c" />
+    </radialGradient>
+
+    <!-- Dare Flame Gradient (Crimson) -->
+    <linearGradient id="flameDare" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fb7185" />
+      <stop offset="50%" stop-color="#e11d48" />
+      <stop offset="100%" stop-color="#9f1239" />
+    </linearGradient>
+
+    <!-- Truth Flame Gradient (Purple) -->
+    <linearGradient id="flameTruth" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c084fc" />
+      <stop offset="50%" stop-color="#9333ea" />
+      <stop offset="100%" stop-color="#581c87" />
+    </linearGradient>
+
+    <!-- Soft Glow Filter -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="16" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- App Icon Base (Squircle) -->
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)" stroke="rgba(255, 255, 255, 0.08)" stroke-width="4" />
+
+  <!-- Subtle Core Light -->
+  <circle cx="256" cy="270" r="110" fill="#f43f5e" opacity="0.12" filter="blur(30px)" />
+
+  <g filter="url(#glow)">
+    <!-- Truth Curve / Flame (Left) -->
+    <path d="M228 140 
+             C240 180, 205 210, 195 240
+             C180 280, 200 330, 245 350
+             C210 345, 175 315, 175 270
+             C175 220, 215 180, 228 140 Z" fill="url(#flameTruth)" />
+
+    <!-- Dare Curve / Flame (Right - Overlapping) -->
+    <path d="M284 140 
+             C272 180, 307 210, 317 240
+             C332 280, 312 330, 267 350
+             C302 345, 337 315, 337 270
+             C337 220, 297 180, 284 140 Z" fill="url(#flameDare)" />
+
+    <!-- Central Spark / Intersection Point -->
+    <ellipse cx="256" cy="305" rx="14" ry="24" fill="#ffffff" opacity="0.85" />
+  </g>
+</svg>
