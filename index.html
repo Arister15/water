@@ -83,25 +83,23 @@
       width: 100%;
       box-shadow: 0 16px 45px rgba(0, 0, 0, 0.7);
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     h1 {
       font-size: 28px;
       font-weight: 700;
-      margin-bottom: 10px;
+      margin-bottom: 0;
       letter-spacing: -0.5px;
       background: linear-gradient(90deg, #ec4899, #f43f5e);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-    p.subtitle {
-      color: var(--text-muted);
-      font-size: 14px;
-      line-height: 1.5;
-      margin-bottom: 24px;
-    }
     .couple-badge {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 10px;
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid rgba(244, 63, 94, 0.3);
@@ -110,7 +108,7 @@
       font-size: 14px;
       font-weight: 600;
       color: #f43f5e;
-      margin-bottom: 28px;
+      margin: 32px 0; /* Ίση απόσταση από τον τίτλο και το κουμπί */
       letter-spacing: 0.5px;
     }
     .couple-badge span { color: #fff; opacity: 0.6; }
@@ -197,6 +195,78 @@
       color: #ffffff;
       margin-bottom: 12px;
     }
+
+    /* ΣΤΥΛ ΧΡΟΝΟΜΕΤΡΟΥ */
+    .timer-container {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      width: 100%;
+    }
+    .timer-display {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #f43f5e;
+      margin-bottom: 6px;
+      font-variant-numeric: tabular-nums;
+      text-shadow: 0 0 12px rgba(244, 63, 94, 0.4);
+    }
+    .timer-display.ended {
+      color: #ef4444;
+      text-shadow: 0 0 16px rgba(239, 68, 68, 0.85);
+    }
+    .timer-status {
+      display: none;
+      font-size: 14px;
+      font-weight: 700;
+      color: #ef4444;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    @keyframes pulseAlert {
+      0% { transform: scale(0.96); opacity: 0.8; }
+      50% { transform: scale(1.06); opacity: 1; }
+      100% { transform: scale(0.96); opacity: 0.8; }
+    }
+    .timer-ended-pulse {
+      display: block !important;
+      animation: pulseAlert 0.7s infinite ease-in-out;
+    }
+    .timer-controls {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-timer {
+      background: rgba(244, 63, 94, 0.18);
+      border: 1px solid rgba(244, 63, 94, 0.45);
+      color: #ffffff;
+      padding: 7px 18px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-timer:active {
+      transform: scale(0.95);
+      background: rgba(244, 63, 94, 0.35);
+    }
+    .btn-timer-reset {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.15);
+      color: var(--text-muted);
+    }
+    .btn-timer-reset:active {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+
     .choice-buttons { display: flex; gap: 14px; width: 100%; margin-bottom: 14px; }
     .choice-btn {
       flex: 1;
@@ -250,7 +320,6 @@
   <!-- START SCREEN -->
   <div id="setup-screen" class="screen-enter">
     <h1>Θάρρος ή Αλήθεια;</h1>
-  
 
     <div class="couple-badge">
       Άρης <span>&</span> Δήμητρα
@@ -269,6 +338,16 @@
     <div id="card-area" class="card-area">
       <div id="card-type" class="card-type" style="color: var(--text-muted);">Επίλεξε</div>
       <div id="card-text" class="card-text">Αντέχεις την Αλήθεια ή προτιμάς το Θάρρος;</div>
+
+      <!-- TIMER CONTAINER -->
+      <div id="timer-container" class="timer-container">
+        <div id="timer-display" class="timer-display">00:30</div>
+        <div id="timer-status" class="timer-status">⏰ Τέλος Χρόνου!</div>
+        <div class="timer-controls">
+          <button id="btn-timer-start" class="btn-timer" onclick="toggleTimer()">Έναρξη</button>
+          <button id="btn-timer-reset" class="btn-timer btn-timer-reset" onclick="resetTimer()">Επαναφορά</button>
+        </div>
+      </div>
     </div>
 
     <div class="choice-buttons" id="choice-buttons">
@@ -286,7 +365,7 @@
 </div>
 
 <script>
-// Αποτροπή κύλισης και bouncing εφέ στο κινητό (κλειδωμένη οθόνη)
+// Αποτροπή κύλισης και bouncing εφέ στο κινητό
 document.addEventListener('touchmove', function(e) {
   if (!e.target.closest('.card-area')) {
     e.preventDefault();
@@ -544,7 +623,7 @@ const truths = [
   "Ποιο είναι το επόμενο βήμα που θα ήθελες να κάνουμε μόλις τελειώσει αυτό το παιχνίδι;"
 ];
 
-// 300 ΔΟΚΙΜΑΣΙΕΣ ΘΑΡΡΟΥΣ (Dares) - Spicy & Bold
+// 300 ΔΟΚΙΜΑΣΙΕΣ ΘΑΡΡΟΥΣ (Dares)
 const dares = [
   "Κλείσε τα μάτια σου: θα σε φιλήσω σε 3 διαφορετικά σημεία του σώματός σου και πρέπει να μαντέψεις ποια ήταν.",
   "Βγάλε μου ένα κομμάτι ρούχου χρησιμοποιώντας αποκλειστικά και μόνο τα δόντια σου.",
@@ -757,6 +836,22 @@ let availableTruths = [];
 let availableDares = [];
 let drawnCount = 0;
 
+// TIMER STATE
+let timerInterval = null;
+let timerInitialSeconds = 0;
+let timerRemainingSeconds = 0;
+
+// HAPTIC FEEDBACK HELPER
+function triggerHaptic(duration = 60) {
+  if (navigator.vibrate) {
+    try {
+      navigator.vibrate(duration);
+    } catch (e) {
+      // safe fallback
+    }
+  }
+}
+
 function shuffle(array) {
   return [...array].sort(() => Math.random() - 0.5);
 }
@@ -781,17 +876,24 @@ function startGame() {
 }
 
 function goToHome() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+
   const setupScreen = document.getElementById('setup-screen');
   const gameScreen = document.getElementById('game-screen');
 
   gameScreen.style.display = 'none';
-  setupScreen.style.display = 'block';
+  setupScreen.style.display = 'flex';
   setupScreen.classList.remove('screen-enter');
   void setupScreen.offsetWidth;
   setupScreen.classList.add('screen-enter');
 }
 
 function updateTurnUI() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  document.getElementById('timer-container').style.display = 'none';
+
   const activePlayer = players[currentTurn];
   document.getElementById('turn-badge').innerText = `Σειρά σου, ${activePlayer}!`;
   document.getElementById('stats').innerText = `Γύρος: ${round} | Κάρτες: ${drawnCount}/600`;
@@ -799,7 +901,7 @@ function updateTurnUI() {
   // Reset card area
   document.getElementById('card-type').innerText = "Επίλεξε";
   document.getElementById('card-type').style.color = "var(--text-muted)";
-  document.getElementById('card-text').innerText = "Αντέχεις την Αλήθεια η προτιμάς το Θάρρος;";
+  document.getElementById('card-text').innerText = "Αντέχεις την Αλήθεια ή προτιμάς το Θάρρος;";
   document.getElementById('card-area').style.borderColor = "rgba(255, 255, 255, 0.1)";
   
   // Show choices, hide actions
@@ -807,7 +909,109 @@ function updateTurnUI() {
   document.getElementById('action-buttons').style.display = 'none';
 }
 
+function extractSeconds(text) {
+  if (!text) return null;
+  if (/μισό\s+λεπτό/i.test(text)) return 30;
+  const minMatch = text.match(/(\d+)\s*λεπτ/i);
+  if (minMatch) {
+    return parseInt(minMatch[1], 10) * 60;
+  }
+  const secMatch = text.match(/(\d+)\s*δευτερολέπτ/i);
+  if (secMatch) {
+    return parseInt(secMatch[1], 10);
+  }
+  return null;
+}
+
+function setupTimerForText(text) {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  
+  const container = document.getElementById('timer-container');
+  const statusEl = document.getElementById('timer-status');
+  const displayEl = document.getElementById('timer-display');
+  const startBtn = document.getElementById('btn-timer-start');
+
+  statusEl.classList.remove('timer-ended-pulse');
+  statusEl.style.display = 'none';
+  displayEl.classList.remove('ended');
+
+  const detectedSeconds = extractSeconds(text);
+  if (detectedSeconds && detectedSeconds > 0) {
+    timerInitialSeconds = detectedSeconds;
+    timerRemainingSeconds = detectedSeconds;
+    updateTimerDisplay(timerRemainingSeconds);
+    startBtn.innerText = 'Έναρξη';
+    container.style.display = 'flex';
+  } else {
+    container.style.display = 'none';
+  }
+}
+
+function updateTimerDisplay(seconds) {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  document.getElementById('timer-display').innerText = 
+    `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+}
+
+function toggleTimer() {
+  const startBtn = document.getElementById('btn-timer-start');
+  const statusEl = document.getElementById('timer-status');
+  const displayEl = document.getElementById('timer-display');
+
+  if (timerInterval) {
+    // Παύση
+    clearInterval(timerInterval);
+    timerInterval = null;
+    startBtn.innerText = 'Συνέχεια';
+    return;
+  }
+
+  if (timerRemainingSeconds <= 0) {
+    timerRemainingSeconds = timerInitialSeconds;
+    statusEl.classList.remove('timer-ended-pulse');
+    statusEl.style.display = 'none';
+    displayEl.classList.remove('ended');
+  }
+
+  startBtn.innerText = 'Παύση';
+
+  timerInterval = setInterval(() => {
+    timerRemainingSeconds--;
+    updateTimerDisplay(timerRemainingSeconds);
+
+    if (timerRemainingSeconds <= 0) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      startBtn.innerText = 'Έναρξη';
+      displayEl.classList.add('ended');
+      statusEl.classList.add('timer-ended-pulse');
+      
+      // Δόνηση 1 δευτερόλεπτο όταν μηδενίσει
+      triggerHaptic(1000);
+    }
+  }, 1000);
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+  timerRemainingSeconds = timerInitialSeconds;
+  updateTimerDisplay(timerRemainingSeconds);
+  
+  const statusEl = document.getElementById('timer-status');
+  const displayEl = document.getElementById('timer-display');
+  statusEl.classList.remove('timer-ended-pulse');
+  statusEl.style.display = 'none';
+  displayEl.classList.remove('ended');
+  document.getElementById('btn-timer-start').innerText = 'Έναρξη';
+}
+
 function drawCard(type) {
+  // Haptic feedback στο πάτημα (ίδιο και για τις 2 κάρτες)
+  triggerHaptic(60);
+
   currentMode = type;
   let text = "";
 
@@ -833,6 +1037,7 @@ function drawCard(type) {
   setTimeout(() => {
     document.getElementById('card-text').innerText = text;
     cardArea.style.transform = "scale(1)";
+    setupTimerForText(text);
   }, 120);
 
   document.getElementById('choice-buttons').style.display = 'none';
@@ -841,17 +1046,22 @@ function drawCard(type) {
 }
 
 function skipCard() {
+  clearInterval(timerInterval);
+  timerInterval = null;
   if (currentMode) {
     drawCard(currentMode);
   }
 }
 
 function nextTurn() {
+  clearInterval(timerInterval);
+  timerInterval = null;
   currentTurn = (currentTurn + 1) % 2;
   if (currentTurn === 0) round++;
   currentMode = null;
   updateTurnUI();
 }
+
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
