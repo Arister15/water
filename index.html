@@ -349,7 +349,7 @@
   <div id="game-screen">
     <div class="top-bar">
       <button class="btn-home" onclick="goToHome()">← Αρχική</button>
-      <div id="turn-badge" class="turn-badge">Σειρά σου!</div>
+      <div id="turn-badge" class="turn-badge">Σειρά σου, Άρης!</div>
     </div>
 
     <!-- TINDER CARD -->
@@ -712,7 +712,7 @@ const dares = [
 ];
 
 // STATE MANAGEMENT
-const players = ["Παίκτης 1", "Παίκτης 2"];
+const players = ["Άρης", "Δήμητρα"];
 let currentTurn = 0;
 let round = 1;
 let currentMode = null;
@@ -743,40 +743,6 @@ const dom = {
   badgeNext: document.getElementById('badge-next')
 };
 
-// WEB AUDIO HAPTIC PULSE (Ειδικά για iPhone/Safari & καθολικό feedback)
-let audioCtx = null;
-function playHapticTick() {
-  try {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContext) return;
-    if (!audioCtx) audioCtx = new AudioContext();
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(100, audioCtx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(35, audioCtx.currentTime + 0.035);
-
-    gain.gain.setValueAtTime(0.8, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.035);
-
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.035);
-  } catch(e) {}
-}
-
-function triggerHaptic(duration = 60) {
-  playHapticTick();
-  if (navigator.vibrate) {
-    try {
-      navigator.vibrate(duration);
-    } catch(e) {}
-  }
-}
-
 // Fisher-Yates Shuffle
 function shuffle(array) {
   const arr = [...array];
@@ -788,7 +754,6 @@ function shuffle(array) {
 }
 
 function startGame() {
-  triggerHaptic(50);
   availableTruths = shuffle(truths);
   availableDares = shuffle(dares);
   currentTurn = 0;
@@ -804,7 +769,6 @@ function startGame() {
 }
 
 function goToHome() {
-  triggerHaptic(40);
   clearInterval(timerInterval);
   timerInterval = null;
 
@@ -820,7 +784,8 @@ function updateTurnUI() {
   timerInterval = null;
   dom.timerContainer.style.display = 'none';
 
-  dom.turnBadge.innerText = `Γύρος ${round} - ${players[currentTurn]}`;
+  const activePlayer = players[currentTurn];
+  dom.turnBadge.innerText = `Σειρά σου, ${activePlayer}!`;
   dom.stats.innerText = `Γύρος: ${round}`;
   
   // Επαναφορά κάρτας
@@ -889,7 +854,6 @@ function updateTimerDisplay(seconds) {
 }
 
 function toggleTimer() {
-  triggerHaptic(40);
   if (timerInterval) {
     clearInterval(timerInterval);
     timerInterval = null;
@@ -916,13 +880,11 @@ function toggleTimer() {
       dom.btnTimerStart.innerText = 'Έναρξη';
       dom.timerDisplay.classList.add('ended');
       dom.timerStatus.classList.add('timer-ended-pulse');
-      triggerHaptic(400);
     }
   }, 1000);
 }
 
 function resetTimer() {
-  triggerHaptic(40);
   clearInterval(timerInterval);
   timerInterval = null;
   timerRemainingSeconds = timerInitialSeconds;
@@ -935,8 +897,6 @@ function resetTimer() {
 }
 
 function drawCard(type, animateFromSwipe = false) {
-  triggerHaptic(75);
-
   currentMode = type;
   let text = "";
 
@@ -954,7 +914,7 @@ function drawCard(type, animateFromSwipe = false) {
     dom.cardArea.style.borderColor = "var(--accent-dare)";
   }
 
-  // Άμεση ανανέωση κειμένου και χρονομέτρου ΧΩΡΙΣ καθυστέρηση
+  // Άμεση ανανέωση κειμένου και χρονομέτρου
   dom.cardText.innerText = text;
   setupTimerForText(text);
 
@@ -990,7 +950,6 @@ function skipCard(fromSwipe = false) {
 }
 
 function nextTurn() {
-  triggerHaptic(50);
   clearInterval(timerInterval);
   timerInterval = null;
   currentTurn = (currentTurn + 1) % 2;
@@ -1074,7 +1033,6 @@ function resetCardInstant() {
 
     if (diffX < -threshold) {
       // SWIPE LEFT -> SKIP
-      triggerHaptic(50);
       card.style.transition = 'transform 0.18s ease-out, opacity 0.18s ease-out';
       card.style.transform = 'translate(-130vw, 0px) rotate(-26deg)';
       card.style.opacity = '0';
@@ -1083,7 +1041,6 @@ function resetCardInstant() {
       }, 160);
     } else if (diffX > threshold) {
       // SWIPE RIGHT -> NEXT TURN
-      triggerHaptic(50);
       card.style.transition = 'transform 0.18s ease-out, opacity 0.18s ease-out';
       card.style.transform = 'translate(130vw, 0px) rotate(26deg)';
       card.style.opacity = '0';
