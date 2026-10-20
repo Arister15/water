@@ -83,7 +83,7 @@
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
       border: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 38px 24px;
+      padding: 46px 24px;
       border-radius: 26px;
       width: 100%;
       box-shadow: 0 16px 45px rgba(0, 0, 0, 0.7);
@@ -93,29 +93,14 @@
       align-items: center;
     }
     h1 {
-      font-size: 28px;
+      font-size: 30px;
       font-weight: 700;
       letter-spacing: -0.5px;
       background: linear-gradient(90deg, #ec4899, #f43f5e);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
+      margin-bottom: 28px;
     }
-    .couple-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(244, 63, 94, 0.3);
-      padding: 8px 18px;
-      border-radius: 30px;
-      font-size: 14px;
-      font-weight: 600;
-      color: #f43f5e;
-      margin: 32px 0;
-      letter-spacing: 0.5px;
-    }
-    .couple-badge span { color: #fff; opacity: 0.6; }
     .btn-start {
       width: 100%;
       background: linear-gradient(135deg, #e11d48, #9333ea);
@@ -168,7 +153,7 @@
       letter-spacing: 0.8px;
     }
 
-    /* ΚΑΡΤΑ & SWIPE BADGES */
+    /* CARD & TINDER SWIPE STYLES */
     .card-area {
       width: 100%;
       min-height: 290px;
@@ -212,14 +197,14 @@
       color: #ef4444;
       border: 2.5px solid #ef4444;
       transform: rotate(14deg);
-      background: rgba(239, 68, 68, 0.12);
+      background: rgba(239, 68, 68, 0.14);
     }
     .badge-next {
       left: 20px;
       color: #10b981;
       border: 2.5px solid #10b981;
       transform: rotate(-14deg);
-      background: rgba(16, 185, 129, 0.12);
+      background: rgba(16, 185, 129, 0.14);
     }
 
     .card-type {
@@ -354,14 +339,9 @@
 <body>
 
 <div class="container">
-  <!-- START SCREEN -->
+  <!-- START SCREEN (Χωρίς ονόματα) -->
   <div id="setup-screen" class="screen-enter">
     <h1>Θάρρος ή Αλήθεια;</h1>
-
-    <div class="couple-badge">
-      Άρης <span>&</span> Δήμητρα
-    </div>
-
     <button class="btn-start" onclick="startGame()">Έναρξη Παιχνιδιού</button>
   </div>
 
@@ -369,12 +349,11 @@
   <div id="game-screen">
     <div class="top-bar">
       <button class="btn-home" onclick="goToHome()">← Αρχική</button>
-      <div id="turn-badge" class="turn-badge">Σειρά σου, Άρης!</div>
+      <div id="turn-badge" class="turn-badge">Σειρά σου!</div>
     </div>
 
-    <!-- TINDER CARD AREA -->
+    <!-- TINDER CARD -->
     <div id="card-area" class="card-area">
-      <!-- Swipe Badges -->
       <div id="badge-next" class="swipe-badge badge-next">Επόμενο ➜</div>
       <div id="badge-skip" class="swipe-badge badge-skip">✖ Skip</div>
 
@@ -407,7 +386,7 @@
 </div>
 
 <script>
-// Αποτροπή άσκοπης κύλισης στο κινητό
+// Αποτροπή scroll/bounce
 document.addEventListener('touchmove', function(e) {
   if (!e.target.closest('.card-area')) {
     e.preventDefault();
@@ -733,7 +712,7 @@ const dares = [
 ];
 
 // STATE MANAGEMENT
-const players = ["Άρης", "Δήμητρα"];
+const players = ["Παίκτης 1", "Παίκτης 2"];
 let currentTurn = 0;
 let round = 1;
 let currentMode = null;
@@ -764,14 +743,37 @@ const dom = {
   badgeNext: document.getElementById('badge-next')
 };
 
-// HAPTIC FEEDBACK HELPER
-function triggerHaptic(pattern = 60) {
+// WEB AUDIO HAPTIC PULSE (Ειδικά για iPhone/Safari & καθολικό feedback)
+let audioCtx = null;
+function playHapticTick() {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    if (!audioCtx) audioCtx = new AudioContext();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(35, audioCtx.currentTime + 0.035);
+
+    gain.gain.setValueAtTime(0.8, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.035);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.035);
+  } catch(e) {}
+}
+
+function triggerHaptic(duration = 60) {
+  playHapticTick();
   if (navigator.vibrate) {
     try {
-      navigator.vibrate(pattern);
-    } catch (e) {
-      // safe fallback
-    }
+      navigator.vibrate(duration);
+    } catch(e) {}
   }
 }
 
@@ -786,6 +788,7 @@ function shuffle(array) {
 }
 
 function startGame() {
+  triggerHaptic(50);
   availableTruths = shuffle(truths);
   availableDares = shuffle(dares);
   currentTurn = 0;
@@ -801,6 +804,7 @@ function startGame() {
 }
 
 function goToHome() {
+  triggerHaptic(40);
   clearInterval(timerInterval);
   timerInterval = null;
 
@@ -816,29 +820,44 @@ function updateTurnUI() {
   timerInterval = null;
   dom.timerContainer.style.display = 'none';
 
-  const activePlayer = players[currentTurn];
-  dom.turnBadge.innerText = `Σειρά σου, ${activePlayer}!`;
+  dom.turnBadge.innerText = `Γύρος ${round} - ${players[currentTurn]}`;
   dom.stats.innerText = `Γύρος: ${round}`;
   
-  // Reset card area
-  resetCardPosition();
+  // Επαναφορά κάρτας
+  resetCardInstant();
   dom.cardType.innerText = "Επίλεξε";
   dom.cardType.style.color = "var(--text-muted)";
   dom.cardText.innerText = "Αντέχεις την Αλήθεια ή προτιμάς το Θάρρος;";
   dom.cardArea.style.borderColor = "rgba(255, 255, 255, 0.1)";
   
-  // Show choices, hide actions
   dom.choiceButtons.style.display = 'flex';
   dom.actionButtons.style.display = 'none';
 }
 
-function extractSeconds(text) {
-  if (!text) return null;
-  if (/μισό\s+λεπτό/i.test(text)) return 30;
-  const minMatch = text.match(/(\d+)\s*λεπτ/i);
-  if (minMatch) return parseInt(minMatch[1], 10) * 60;
-  const secMatch = text.match(/(\d+)\s*δευτερολέπτ/i);
+// Αφαίρεση ελληνικών τόνων για αλάνθαστη αναγνώριση
+function removeAccents(str) {
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
+function extractSeconds(rawText) {
+  if (!rawText) return null;
+  const text = removeAccents(rawText);
+
+  if (text.includes("μισο λεπτο") || text.includes("μισου λεπτου")) return 30;
+  if (text.includes("ενα λεπτο") || text.includes("ενος λεπτου")) return 60;
+  if (text.includes("δυο λεπτα")) return 120;
+
+  // Αναζήτηση δευτερολέπτων (π.χ. 30 δευτερολεπτα, 45 δευτερολεπτων)
+  const secMatch = text.match(/(\d+)\s*δευτερολεπτ/);
   if (secMatch) return parseInt(secMatch[1], 10);
+
+  // Αναζήτηση λεπτών (π.χ. 1 λεπτο, 2 λεπτα)
+  const minMatch = text.match(/(\d+)\s*λεπτ/);
+  if (minMatch) {
+    const mins = parseInt(minMatch[1], 10);
+    if (mins <= 5) return mins * 60;
+  }
+
   return null;
 }
 
@@ -870,6 +889,7 @@ function updateTimerDisplay(seconds) {
 }
 
 function toggleTimer() {
+  triggerHaptic(40);
   if (timerInterval) {
     clearInterval(timerInterval);
     timerInterval = null;
@@ -896,12 +916,13 @@ function toggleTimer() {
       dom.btnTimerStart.innerText = 'Έναρξη';
       dom.timerDisplay.classList.add('ended');
       dom.timerStatus.classList.add('timer-ended-pulse');
-      triggerHaptic([300, 100, 300]);
+      triggerHaptic(400);
     }
   }, 1000);
 }
 
 function resetTimer() {
+  triggerHaptic(40);
   clearInterval(timerInterval);
   timerInterval = null;
   timerRemainingSeconds = timerInitialSeconds;
@@ -913,9 +934,8 @@ function resetTimer() {
   dom.btnTimerStart.innerText = 'Έναρξη';
 }
 
-function drawCard(type) {
-  // Δυναμικό haptic pattern κατά το πάτημα
-  triggerHaptic([45, 30, 45]);
+function drawCard(type, animateFromSwipe = false) {
+  triggerHaptic(75);
 
   currentMode = type;
   let text = "";
@@ -934,30 +954,43 @@ function drawCard(type) {
     dom.cardArea.style.borderColor = "var(--accent-dare)";
   }
 
-  resetCardPosition();
-  dom.cardArea.style.transform = "scale(0.96)";
+  // Άμεση ανανέωση κειμένου και χρονομέτρου ΧΩΡΙΣ καθυστέρηση
+  dom.cardText.innerText = text;
+  setupTimerForText(text);
 
-  setTimeout(() => {
-    dom.cardText.innerText = text;
-    dom.cardArea.style.transition = "transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
-    dom.cardArea.style.transform = "scale(1)";
-    setupTimerForText(text);
-  }, 90);
+  if (animateFromSwipe) {
+    // Επαναφορά με καθαρό scale-in (δεν φαίνεται ποτέ η παλιά ερώτηση)
+    dom.cardArea.style.transition = 'none';
+    dom.cardArea.style.transform = 'scale(0.88)';
+    dom.cardArea.style.opacity = '0';
+    void dom.cardArea.offsetWidth; // Trigger reflow
+    dom.cardArea.style.transition = 'transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease-out';
+    dom.cardArea.style.transform = 'scale(1) translate(0px, 0px) rotate(0deg)';
+    dom.cardArea.style.opacity = '1';
+  } else {
+    // Pop animation για πάτημα κουμπιού
+    dom.cardArea.style.transition = 'none';
+    dom.cardArea.style.transform = 'scale(0.95)';
+    void dom.cardArea.offsetWidth;
+    dom.cardArea.style.transition = 'transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+    dom.cardArea.style.transform = 'scale(1)';
+  }
 
   dom.choiceButtons.style.display = 'none';
   dom.actionButtons.style.display = 'flex';
   dom.stats.innerText = `Γύρος: ${round}`;
 }
 
-function skipCard() {
+function skipCard(fromSwipe = false) {
   clearInterval(timerInterval);
   timerInterval = null;
   if (currentMode) {
-    drawCard(currentMode);
+    drawCard(currentMode, fromSwipe);
   }
 }
 
 function nextTurn() {
+  triggerHaptic(50);
   clearInterval(timerInterval);
   timerInterval = null;
   currentTurn = (currentTurn + 1) % 2;
@@ -966,15 +999,15 @@ function nextTurn() {
   updateTurnUI();
 }
 
-function resetCardPosition() {
+function resetCardInstant() {
   dom.cardArea.style.transition = 'none';
-  dom.cardArea.style.transform = 'translate(0px, 0px) rotate(0deg)';
+  dom.cardArea.style.transform = 'translate(0px, 0px) rotate(0deg) scale(1)';
   dom.cardArea.style.opacity = '1';
   dom.badgeSkip.style.opacity = '0';
   dom.badgeNext.style.opacity = '0';
 }
 
-/* TINDER SWIPE GESTURE IMPLEMENTATION */
+/* TINDER SWIPE SYSTEM */
 (function setupSwipe() {
   const card = dom.cardArea;
   let isDragging = false;
@@ -1012,9 +1045,9 @@ function resetCardPosition() {
     if (!isHorizontalGesture) return;
 
     const rotate = diffX * 0.08;
-    card.style.transform = `translate(${diffX}px, ${diffY * 0.15}px) rotate(${rotate}deg)`;
+    card.style.transform = `translate(${diffX}px, ${diffY * 0.12}px) rotate(${rotate}deg)`;
 
-    const progress = Math.min(Math.abs(diffX) / 100, 1);
+    const progress = Math.min(Math.abs(diffX) / 95, 1);
     if (diffX < 0) {
       dom.badgeSkip.style.opacity = progress;
       dom.badgeNext.style.opacity = 0;
@@ -1029,64 +1062,58 @@ function resetCardPosition() {
     isDragging = false;
 
     if (!isHorizontalGesture) {
-      resetCardPosition();
+      resetCardInstant();
       return;
     }
 
     const diffX = currentX - startX;
-    const threshold = 95;
+    const threshold = 90;
 
-    card.style.transition = 'transform 0.28s ease-out, opacity 0.28s ease-out';
     dom.badgeSkip.style.opacity = 0;
     dom.badgeNext.style.opacity = 0;
 
     if (diffX < -threshold) {
       // SWIPE LEFT -> SKIP
-      card.style.transform = 'translate(-140vw, 0px) rotate(-28deg)';
+      triggerHaptic(50);
+      card.style.transition = 'transform 0.18s ease-out, opacity 0.18s ease-out';
+      card.style.transform = 'translate(-130vw, 0px) rotate(-26deg)';
       card.style.opacity = '0';
-      triggerHaptic(40);
       setTimeout(() => {
-        skipCard();
-      }, 200);
+        skipCard(true);
+      }, 160);
     } else if (diffX > threshold) {
       // SWIPE RIGHT -> NEXT TURN
-      card.style.transform = 'translate(140vw, 0px) rotate(28deg)';
+      triggerHaptic(50);
+      card.style.transition = 'transform 0.18s ease-out, opacity 0.18s ease-out';
+      card.style.transform = 'translate(130vw, 0px) rotate(26deg)';
       card.style.opacity = '0';
-      triggerHaptic(40);
       setTimeout(() => {
         nextTurn();
-      }, 200);
+      }, 160);
     } else {
       // SNAP BACK
-      card.style.transform = 'translate(0px, 0px) rotate(0deg)';
+      card.style.transition = 'transform 0.22s ease-out, opacity 0.22s ease-out';
+      card.style.transform = 'translate(0px, 0px) rotate(0deg) scale(1)';
       card.style.opacity = '1';
     }
   }
 
-  // Touch Events (Mobile)
-  card.addEventListener('touchstart', (e) => {
-    onStart(e.touches[0].clientX, e.touches[0].clientY, e.target);
-  }, { passive: true });
-
-  card.addEventListener('touchmove', (e) => {
-    onMove(e.touches[0].clientX, e.touches[0].clientY);
-  }, { passive: true });
-
+  card.addEventListener('touchstart', (e) => onStart(e.touches[0].clientX, e.touches[0].clientY, e.target), { passive: true });
+  card.addEventListener('touchmove', (e) => onMove(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
   card.addEventListener('touchend', onEnd);
   card.addEventListener('touchcancel', onEnd);
 
-  // Mouse Fallback (Desktop Testing)
   card.addEventListener('mousedown', (e) => onStart(e.clientX, e.clientY, e.target));
   window.addEventListener('mousemove', (e) => onMove(e.clientX, e.clientY));
   window.addEventListener('mouseup', onEnd);
 })();
 
-// Service Worker Registration
+// Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
-      .then(reg => console.log('Service Worker ενεργοποιήθηκε:', reg.scope))
-      .catch(err => console.error('Αποτυχία Service Worker:', err));
+      .then(reg => console.log('SW Active:', reg.scope))
+      .catch(err => console.error('SW Error:', err));
   });
 }
 </script>
