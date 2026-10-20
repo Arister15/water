@@ -9,10 +9,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Θάρρος ή Αλήθεια;</title>
 
-  <!-- Βελτιστοποίηση φόρτωσης Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
 
   <style>
     :root {
@@ -96,7 +95,6 @@
     h1 {
       font-size: 28px;
       font-weight: 700;
-      margin-bottom: 0;
       letter-spacing: -0.5px;
       background: linear-gradient(90deg, #ec4899, #f43f5e);
       -webkit-background-clip: text;
@@ -169,6 +167,8 @@
       text-transform: uppercase;
       letter-spacing: 0.8px;
     }
+
+    /* ΚΑΡΤΑ & SWIPE BADGES */
     .card-area {
       width: 100%;
       min-height: 290px;
@@ -185,9 +185,43 @@
       text-align: center;
       box-shadow: 0 16px 45px rgba(0,0,0,0.7);
       margin-bottom: 22px;
-      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.2s;
+      position: relative;
+      touch-action: pan-y;
+      will-change: transform, opacity;
+      cursor: grab;
       overflow-y: auto;
     }
+    .card-area:active { cursor: grabbing; }
+
+    .swipe-badge {
+      position: absolute;
+      top: 18px;
+      padding: 6px 14px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      pointer-events: none;
+      opacity: 0;
+      z-index: 10;
+      transition: opacity 0.1s ease;
+    }
+    .badge-skip {
+      right: 20px;
+      color: #ef4444;
+      border: 2.5px solid #ef4444;
+      transform: rotate(14deg);
+      background: rgba(239, 68, 68, 0.12);
+    }
+    .badge-next {
+      left: 20px;
+      color: #10b981;
+      border: 2.5px solid #10b981;
+      transform: rotate(-14deg);
+      background: rgba(16, 185, 129, 0.12);
+    }
+
     .card-type {
       font-size: 13px;
       font-weight: 700;
@@ -203,6 +237,7 @@
       margin-bottom: 12px;
     }
 
+    /* ΧΡΟΝΟΜΕΤΡΟ */
     .timer-container {
       display: none;
       flex-direction: column;
@@ -268,10 +303,6 @@
       border-color: rgba(255, 255, 255, 0.15);
       color: var(--text-muted);
     }
-    .btn-timer-reset:active {
-      background: rgba(255, 255, 255, 0.15);
-      color: #fff;
-    }
 
     .choice-buttons { display: flex; gap: 14px; width: 100%; margin-bottom: 14px; }
     .choice-btn {
@@ -317,7 +348,7 @@
       border: 1px solid rgba(255, 255, 255, 0.2);
     }
     .btn-next:active { background: #3f3f46; }
-    .stats { font-size: 12px; color: var(--text-muted); margin-top: 18px; }
+    .stats { font-size: 13px; font-weight: 600; color: var(--text-muted); margin-top: 18px; }
   </style>
 </head>
 <body>
@@ -341,7 +372,12 @@
       <div id="turn-badge" class="turn-badge">Σειρά σου, Άρης!</div>
     </div>
 
+    <!-- TINDER CARD AREA -->
     <div id="card-area" class="card-area">
+      <!-- Swipe Badges -->
+      <div id="badge-next" class="swipe-badge badge-next">Επόμενο ➜</div>
+      <div id="badge-skip" class="swipe-badge badge-skip">✖ Skip</div>
+
       <div id="card-type" class="card-type" style="color: var(--text-muted);">Επίλεξε</div>
       <div id="card-text" class="card-text">Αντέχεις την Αλήθεια ή προτιμάς το Θάρρος;</div>
 
@@ -366,7 +402,7 @@
       <button class="btn-action btn-next" onclick="nextTurn()">Επόμενος Γύρος →</button>
     </div>
 
-    <div class="stats" id="stats">Γύρος: 1 | Κάρτες: 0</div>
+    <div class="stats" id="stats">Γύρος: 1</div>
   </div>
 </div>
 
@@ -703,15 +739,13 @@ let round = 1;
 let currentMode = null;
 let availableTruths = [];
 let availableDares = [];
-let drawnCount = 0;
-const totalCards = truths.length + dares.length;
 
 // TIMER STATE
 let timerInterval = null;
 let timerInitialSeconds = 0;
 let timerRemainingSeconds = 0;
 
-// CACHED DOM ELEMENTS (για αποφυγή περιττού reflow & DOM lookups)
+// CACHED DOM ELEMENTS
 const dom = {
   setupScreen: document.getElementById('setup-screen'),
   gameScreen: document.getElementById('game-screen'),
@@ -725,21 +759,23 @@ const dom = {
   timerContainer: document.getElementById('timer-container'),
   timerDisplay: document.getElementById('timer-display'),
   timerStatus: document.getElementById('timer-status'),
-  btnTimerStart: document.getElementById('btn-timer-start')
+  btnTimerStart: document.getElementById('btn-timer-start'),
+  badgeSkip: document.getElementById('badge-skip'),
+  badgeNext: document.getElementById('badge-next')
 };
 
 // HAPTIC FEEDBACK HELPER
-function triggerHaptic(duration = 60) {
+function triggerHaptic(pattern = 60) {
   if (navigator.vibrate) {
     try {
-      navigator.vibrate(duration);
+      navigator.vibrate(pattern);
     } catch (e) {
       // safe fallback
     }
   }
 }
 
-// Αλγόριθμος Fisher-Yates για πραγματικά τυχαίο ανακάτεμα
+// Fisher-Yates Shuffle
 function shuffle(array) {
   const arr = [...array];
   for (let i = arr.length - 1; i > 0; i--) {
@@ -754,12 +790,11 @@ function startGame() {
   availableDares = shuffle(dares);
   currentTurn = 0;
   round = 1;
-  drawnCount = 0;
 
   dom.setupScreen.style.display = 'none';
   dom.gameScreen.style.display = 'flex';
   dom.gameScreen.classList.remove('screen-enter');
-  void dom.gameScreen.offsetWidth; // Trigger reflow
+  void dom.gameScreen.offsetWidth;
   dom.gameScreen.classList.add('screen-enter');
 
   updateTurnUI();
@@ -772,7 +807,7 @@ function goToHome() {
   dom.gameScreen.style.display = 'none';
   dom.setupScreen.style.display = 'flex';
   dom.setupScreen.classList.remove('screen-enter');
-  void dom.setupScreen.offsetWidth; // Trigger reflow
+  void dom.setupScreen.offsetWidth;
   dom.setupScreen.classList.add('screen-enter');
 }
 
@@ -783,9 +818,10 @@ function updateTurnUI() {
 
   const activePlayer = players[currentTurn];
   dom.turnBadge.innerText = `Σειρά σου, ${activePlayer}!`;
-  dom.stats.innerText = `Γύρος: ${round} | Κάρτες: ${drawnCount}/${totalCards}`;
+  dom.stats.innerText = `Γύρος: ${round}`;
   
   // Reset card area
+  resetCardPosition();
   dom.cardType.innerText = "Επίλεξε";
   dom.cardType.style.color = "var(--text-muted)";
   dom.cardText.innerText = "Αντέχεις την Αλήθεια ή προτιμάς το Θάρρος;";
@@ -800,13 +836,9 @@ function extractSeconds(text) {
   if (!text) return null;
   if (/μισό\s+λεπτό/i.test(text)) return 30;
   const minMatch = text.match(/(\d+)\s*λεπτ/i);
-  if (minMatch) {
-    return parseInt(minMatch[1], 10) * 60;
-  }
+  if (minMatch) return parseInt(minMatch[1], 10) * 60;
   const secMatch = text.match(/(\d+)\s*δευτερολέπτ/i);
-  if (secMatch) {
-    return parseInt(secMatch[1], 10);
-  }
+  if (secMatch) return parseInt(secMatch[1], 10);
   return null;
 }
 
@@ -864,7 +896,7 @@ function toggleTimer() {
       dom.btnTimerStart.innerText = 'Έναρξη';
       dom.timerDisplay.classList.add('ended');
       dom.timerStatus.classList.add('timer-ended-pulse');
-      triggerHaptic(500);
+      triggerHaptic([300, 100, 300]);
     }
   }, 1000);
 }
@@ -882,7 +914,8 @@ function resetTimer() {
 }
 
 function drawCard(type) {
-  triggerHaptic(60);
+  // Δυναμικό haptic pattern κατά το πάτημα
+  triggerHaptic([45, 30, 45]);
 
   currentMode = type;
   let text = "";
@@ -901,18 +934,19 @@ function drawCard(type) {
     dom.cardArea.style.borderColor = "var(--accent-dare)";
   }
 
-  drawnCount++;
-
+  resetCardPosition();
   dom.cardArea.style.transform = "scale(0.96)";
+
   setTimeout(() => {
     dom.cardText.innerText = text;
+    dom.cardArea.style.transition = "transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
     dom.cardArea.style.transform = "scale(1)";
     setupTimerForText(text);
-  }, 100);
+  }, 90);
 
   dom.choiceButtons.style.display = 'none';
   dom.actionButtons.style.display = 'flex';
-  dom.stats.innerText = `Γύρος: ${round} | Κάρτες: ${drawnCount}/${totalCards}`;
+  dom.stats.innerText = `Γύρος: ${round}`;
 }
 
 function skipCard() {
@@ -932,7 +966,122 @@ function nextTurn() {
   updateTurnUI();
 }
 
-// Εγγραφή Service Worker
+function resetCardPosition() {
+  dom.cardArea.style.transition = 'none';
+  dom.cardArea.style.transform = 'translate(0px, 0px) rotate(0deg)';
+  dom.cardArea.style.opacity = '1';
+  dom.badgeSkip.style.opacity = '0';
+  dom.badgeNext.style.opacity = '0';
+}
+
+/* TINDER SWIPE GESTURE IMPLEMENTATION */
+(function setupSwipe() {
+  const card = dom.cardArea;
+  let isDragging = false;
+  let startX = 0;
+  let startY = 0;
+  let currentX = 0;
+  let currentY = 0;
+  let isHorizontalGesture = null;
+
+  function onStart(x, y, target) {
+    if (!currentMode) return;
+    if (target.closest('.timer-controls') || target.closest('button')) return;
+    isDragging = true;
+    startX = x;
+    startY = y;
+    currentX = x;
+    currentY = y;
+    isHorizontalGesture = null;
+    card.style.transition = 'none';
+  }
+
+  function onMove(x, y) {
+    if (!isDragging || !currentMode) return;
+    currentX = x;
+    currentY = y;
+    const diffX = currentX - startX;
+    const diffY = currentY - startY;
+
+    if (isHorizontalGesture === null) {
+      if (Math.abs(diffX) > 8 || Math.abs(diffY) > 8) {
+        isHorizontalGesture = Math.abs(diffX) > Math.abs(diffY);
+      }
+    }
+
+    if (!isHorizontalGesture) return;
+
+    const rotate = diffX * 0.08;
+    card.style.transform = `translate(${diffX}px, ${diffY * 0.15}px) rotate(${rotate}deg)`;
+
+    const progress = Math.min(Math.abs(diffX) / 100, 1);
+    if (diffX < 0) {
+      dom.badgeSkip.style.opacity = progress;
+      dom.badgeNext.style.opacity = 0;
+    } else {
+      dom.badgeNext.style.opacity = progress;
+      dom.badgeSkip.style.opacity = 0;
+    }
+  }
+
+  function onEnd() {
+    if (!isDragging || !currentMode) return;
+    isDragging = false;
+
+    if (!isHorizontalGesture) {
+      resetCardPosition();
+      return;
+    }
+
+    const diffX = currentX - startX;
+    const threshold = 95;
+
+    card.style.transition = 'transform 0.28s ease-out, opacity 0.28s ease-out';
+    dom.badgeSkip.style.opacity = 0;
+    dom.badgeNext.style.opacity = 0;
+
+    if (diffX < -threshold) {
+      // SWIPE LEFT -> SKIP
+      card.style.transform = 'translate(-140vw, 0px) rotate(-28deg)';
+      card.style.opacity = '0';
+      triggerHaptic(40);
+      setTimeout(() => {
+        skipCard();
+      }, 200);
+    } else if (diffX > threshold) {
+      // SWIPE RIGHT -> NEXT TURN
+      card.style.transform = 'translate(140vw, 0px) rotate(28deg)';
+      card.style.opacity = '0';
+      triggerHaptic(40);
+      setTimeout(() => {
+        nextTurn();
+      }, 200);
+    } else {
+      // SNAP BACK
+      card.style.transform = 'translate(0px, 0px) rotate(0deg)';
+      card.style.opacity = '1';
+    }
+  }
+
+  // Touch Events (Mobile)
+  card.addEventListener('touchstart', (e) => {
+    onStart(e.touches[0].clientX, e.touches[0].clientY, e.target);
+  }, { passive: true });
+
+  card.addEventListener('touchmove', (e) => {
+    onMove(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: true });
+
+  card.addEventListener('touchend', onEnd);
+  card.addEventListener('touchcancel', onEnd);
+
+  // Mouse Fallback (Desktop Testing)
+  card.addEventListener('mousedown', (e) => onStart(e.clientX, e.clientY, e.target));
+  window.addEventListener('mousemove', (e) => onMove(e.clientX, e.clientY));
+  window.addEventListener('mouseup', onEnd);
+})();
+
+// Service Worker Registration
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
