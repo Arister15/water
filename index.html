@@ -1,14 +1,19 @@
 <!DOCTYPE html>
 <html lang="el">
 <head>
-  <link rel="manifest" href="manifest.json">
   <meta charset="UTF-8">
+  <link rel="manifest" href="manifest.json">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#0b090d">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Θάρρος ή Αλήθεια;</title>
+
+  <!-- Βελτιστοποίηση φόρτωσης Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+
   <style>
     :root {
       --bg-dark: #0b090d;
@@ -67,16 +72,17 @@
     }
 
     @keyframes screenFadeIn {
-      from { opacity: 0; transform: translateY(22px) scale(0.97); }
+      from { opacity: 0; transform: translateY(18px) scale(0.98); }
       to { opacity: 1; transform: translateY(0) scale(1); }
     }
     .screen-enter {
-      animation: screenFadeIn 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      animation: screenFadeIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
     #setup-screen {
       background: var(--card-bg);
       backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
       border: 1px solid rgba(255, 255, 255, 0.08);
       padding: 38px 24px;
       border-radius: 26px;
@@ -108,7 +114,7 @@
       font-size: 14px;
       font-weight: 600;
       color: #f43f5e;
-      margin: 32px 0; /* Ίση απόσταση από τον τίτλο και το κουμπί */
+      margin: 32px 0;
       letter-spacing: 0.5px;
     }
     .couple-badge span { color: #fff; opacity: 0.6; }
@@ -168,6 +174,7 @@
       min-height: 290px;
       background: var(--card-bg);
       backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
       border-radius: 26px;
       border: 1px solid rgba(255, 255, 255, 0.1);
       display: flex;
@@ -178,7 +185,7 @@
       text-align: center;
       box-shadow: 0 16px 45px rgba(0,0,0,0.7);
       margin-bottom: 22px;
-      transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.2s;
       overflow-y: auto;
     }
     .card-type {
@@ -196,7 +203,6 @@
       margin-bottom: 12px;
     }
 
-    /* ΣΤΥΛ ΧΡΟΝΟΜΕΤΡΟΥ */
     .timer-container {
       display: none;
       flex-direction: column;
@@ -360,19 +366,19 @@
       <button class="btn-action btn-next" onclick="nextTurn()">Επόμενος Γύρος →</button>
     </div>
 
-    <div class="stats" id="stats">Γύρος: 1 | Κάρτες: 0/600</div>
+    <div class="stats" id="stats">Γύρος: 1 | Κάρτες: 0</div>
   </div>
 </div>
 
 <script>
-// Αποτροπή κύλισης και bouncing εφέ στο κινητό
+// Αποτροπή άσκοπης κύλισης στο κινητό
 document.addEventListener('touchmove', function(e) {
   if (!e.target.closest('.card-area')) {
     e.preventDefault();
   }
 }, { passive: false });
 
-// 300 ΑΛΗΘΕΙΕΣ (Truths)
+// 150+ ΑΛΗΘΕΙΕΣ (Truths)
 const truths = [
   "Ποια ήταν η πρώτη, εντελώς αφιλτράριστη σκέψη που έκανες για μένα όταν με είδες για πρώτη φορά;",
   "Σε ποιο σημείο του σώματός σου έχεις τη μεγαλύτερη ευαισθησία στο άγγιγμα χωρίς να είναι το προφανές;",
@@ -532,98 +538,10 @@ const truths = [
   "Ποια είναι η πιο απρόσμενη στιγμή που σου ήρθε έντονη ερωτική επιθυμία;",
   "Έχεις πει ποτέ λάθος όνομα στο κρεβάτι;",
   "Ποιο είναι το πιο σέξι χαρακτηριστικό που μπορεί να έχει κάποιος στον τρόπο που περπατάει;",
-  "Έχεις σκεφτεί ποτέ πώς θα ήταν να μας πιάσουν στα πράσα;",
-  "Ποιο είναι το πιο τολμηρό πράγμα που έχεις κάνει στο μπαλκόνι σου;",
-  "Έχεις νιώσει ποτέ ότι ένα ραντεβού ήταν τόσο κακό που ήθελες να ανοίξει η γη να σε καταπιεί;",
-  "Ποιο είναι το πιο περίεργο trigger που σου ανεβάζει τη θερμοκρασία αμέσως;",
-  "Έχεις πει ποτέ ψέματα για το πόσα άτομα έχεις φιλήσει στη ζωή σου;",
-  "Ποια είναι η αγαπημένη σου κίνηση προκαταρκτικών που δεν αποτυγχάνει ποτέ;",
-  "Έχεις σκεφτεί ποτέ να κάνεις τατουάζ σε πολύ κρυφό, απόκρυφο σημείο;",
-  "Ποιο είναι το πιο άβολο μήνυμα που έχεις στείλει κατά λάθος σε ομαδική συνομιλία;",
-  "Έχεις νιώσει ποτέ να σε ελκύει κάποιος που ως χαρακτήρας ήταν εντελώς απαράδεκτος;",
-  "Ποια είναι η πρώτη σου σκέψη όταν ξυπνάς δίπλα σε κάποιον το επόμενο πρωί;",
-  "Έχεις ποτέ δοκιμάσει να κάνεις strip tease για κάποιον στο παρελθόν;",
-  "Ποιο είναι το πιο αισθησιακό άρωμα που μπορεί να φορέσει κάποιος κατά τη γνώμη σου;",
-  "Έχεις νιώσει ποτέ ότι η αναπνοή κάποιου σε αναστατώνει πριν καν σε αγγίξει;",
-  "Ποιο είναι το πιο τολμηρό challenge που έχεις δεχτεί ποτέ σε πάρτι;",
-  "Έχεις ποτέ κρύψει σημάδι στο λαιμό με make up ή ρούχα για να μην το δουν στη δουλειά/σπίτι;",
-  "Ποια είναι η πιο ακραία φαντασίωση που περιλαμβάνει συγκεκριμένο μέρος;",
-  "Έχεις κάνει ποτέ σεξ σε πισίνα ή θάλασσα τη νύχτα;",
-  "Ποιο είναι το πιο περίεργο πράγμα που σε κάνει να νιώθεις αμέσως σέξι;",
-  "Έχεις στείλει ποτέ μήνυμα που περιείχε μόνο έναν υπαινιγμό και περίμενες με αγωνία απάντηση;",
-  "Ποια είναι η αγαπημένη σου αντίδραση του παρτενέρ όταν του κάνεις κάτι που του αρέσει;",
-  "Έχεις νιώσει ποτέ ότι ένα άγγιγμα ήταν τόσο ηλεκτρικό που σου κόπηκε η ανάσα;",
-  "Ποιο είναι το πιο τρελό πράγμα που έχεις κάνει για να τραβήξεις την προσοχή μου;",
-  "Έχεις ποτέ προσποιηθεί ότι δεν ξέρεις κάτι μόνο και μόνο για να σου το δείξει κάποιος από κοντά;",
-  "Ποια είναι η άποψή σου για το να κοιμάστε εντελώς γυμνοί μαζί;",
-  "Έχεις ποτέ σκεφτεί κάποιον καθηγητή ή προϊστάμενο με ερωτικό τρόπο;",
-  "Ποιο είναι το μεγαλύτερο ψέμα που έχεις πει για να καλύψεις μια ερωτική σου περιπέτεια;",
-  "Έχεις νιώσει ποτέ αμηχανία για τον ήχο της φωνής σου όταν κάνεις έρωτα;",
-  "Ποιο είναι το πιο τολμηρό πράγμα που έχεις παραγγείλει ποτέ online;",
-  "Έχεις ποτέ φιληθεί με κάποιον μέσα στη βροχή;",
-  "Ποια είναι η πιο έντονη ανάμνηση που έχεις από άγγιγμα στα μαλλιά σου;",
-  "Έχεις δοκιμάσει ποτέ να κάνεις μασάζ με ζεστό κερί;",
-  "Ποιο είναι το πιο ακραίο μέρος όπου έχεις αγγίξει κρυφά κάποιον κάτω από το τραπέζι;",
-  "Έχεις νιώσει ποτέ ότι σε κοιτάζουν τόσο έντονα που δεν μπορούσες να αρθρώσεις λέξη;",
-  "Ποιο είναι το αγαπημένο σου είδος αγγίγματος: απαλό σαν πούπουλο ή σφιχτό και δυνατό;",
-  "Έχεις ποτέ ξαπλώσει στο πάτωμα με κάποιον για ώρες απλώς μιλώντας και φιλιώντας;",
-  "Ποιο είναι το μεγαλύτερο μυστικό που κρατάς αυτή τη στιγμή από τους φίλους σου;",
-  "Έχεις ποτέ μπερδέψει τον ενθουσιασμό με τον έρωτα σε μια γνωριμία;",
-  "Ποια είναι η πιο άβολη στιγμή που σου έχει τύχει σε ασανσέρ με κάποιον;",
-  "Έχεις νιώσει ποτέ την καρδιά σου να χτυπάει τόσο γρήγορα από λαχτάρα για ένα φιλί;",
-  "Ποιο είναι το πιο επικίνδυνο πράγμα που έχεις κάνει ποτέ σε σχέση;",
-  "Έχεις ποτέ δοκιμάσει να δαγκώσεις απαλά το χείλος κάποιου για να δεις την αντίδρασή του;",
-  "Ποια είναι η πιο αυθόρμητη απόφαση που έχεις πάρει ποτέ για να συναντήσεις κάποιον;",
-  "Έχεις ποτέ φύγει από το σπίτι μέσα στα μεσάνυχτα μόνο για να βρεθείς με κάποιον;",
-  "Ποια είναι η μεγαλύτερη σου επιθυμία που αφορά εμάς τους δύο τις επόμενες ώρες;",
-  "Ποια είναι η πρώτη σκέψη που κάνεις όταν σου στέλνω μήνυμα αργά το βράδυ;",
-  "Έχεις ποτέ προσπαθήσει να διαβάσεις τη γλώσσα του σώματός μου για να δεις αν σε θέλω;",
-  "Ποιο είναι το πιο σέξι πράγμα που μπορεί να φορέσει κάποιος στο σπίτι;",
-  "Έχεις νιώσει ποτέ την ανάγκη να αρπάξεις κάποιον και να τον φιλήσεις χωρίς προειδοποίηση;",
-  "Ποιο είναι το πιο άβολο πράγμα που σου έχουν πει ποτέ κατά τη διάρκεια ενός ραντεβού;",
-  "Έχεις ποτέ σκεφτεί πώς θα ήταν αν περνούσαμε ένα ολόκληρο σαββατοκύριακο στο κρεβάτι;",
-  "Ποια είναι η γνώμη σου για τα αργά, βασανιστικά προκαταρκτικά;",
-  "Έχεις ποτέ πειραματιστεί με θερμοκρασίες (ζεστό/κρύο) στο δέρμα σου κατά τη διάρκεια του σεξ;",
-  "Ποιο είναι το πιο τολμηρό πράγμα που έχεις κάνει ποτέ σε παραλία γεμάτη κόσμο;",
-  "Έχεις νιώσει ποτέ να κοκκινίζεις από ένα και μόνο βλέμμα κάποιου;",
-  "Ποιο είναι το μεγαλύτερο λάθος που κάνουν οι περισσότεροι άνθρωποι όταν φιλούν;",
-  "Έχεις ποτέ ευχηθεί να μπορούσες να γυρίσεις τον χρόνο πίσω για να ξαναζήσεις μια ερωτική νύχτα;",
-  "Ποιο είναι το πιο αισθησιακό πράγμα που μπορεί να κάνει κάποιος με τα χέρια του;",
-  "Έχεις ποτέ κοιτάξει κάποιον στα μάτια και να σκεφτείς: 'Δεν αντέχω άλλο, θέλω να τον/την αγγίξω';",
-  "Ποια είναι η άποψή σου για τα φιλιά στο πίσω μέρος του γονάτου ή στο εσωτερικό του μηρού;",
-  "Έχεις ποτέ νιώσει ζήλια χωρίς να έχεις κανένα δικαίωμα να ζηλέψεις;",
-  "Ποιο είναι το πιο περίεργο πράγμα που έχεις ψιθυρίσει σε κάποιον όσο κοιμόταν;",
-  "Έχεις ποτέ φορέσει κάτι απλώς και μόνο επειδή ήξερες ότι θα με τρελάνει;",
-  "Ποια είναι η πιο έντονη αντίδραση που είχες ποτέ όταν κάποιος σου άγγιξε τον λαιμό;",
-  "Έχεις σκεφτεί ποτέ να κλείσεις τα μάτια σου και να αφήσεις κάποιον να κάνει ό,τι θέλει;",
-  "Ποιο είναι το πιο τολμηρό πράγμα που θα έκανες αν ήμασταν μόνοι σε ένα εξοχικό σπίτι;",
-  "Έχεις ποτέ νιώσει ότι ένα φιλί μπορεί να αλλάξει τα πάντα σε μια σχέση;",
-  "Ποιο είναι το μεγαλύτερο ρίσκο που είσαι διατεθειμένος/η να πάρεις απόψε;",
-  "Έχεις ποτέ ονειρευτεί κάτι για μένα που σε έκανε να ξυπνήσεις αναστατωμένος/η;",
-  "Ποια είναι η πιο ερωτική μουσική νότα ή ρυθμός που σε αποσυντονίζει εντελώς;",
-  "Έχεις ποτέ σκεφτεί πώς μυρίζει το δέρμα μου;",
-  "Ποιο είναι το πιο έντονο συναίσθημα που σου προκαλεί το να είμαστε τόσο κοντά αυτή τη στιγμή;",
-  "Έχεις ποτέ φοβηθεί ότι αν ξεκινήσουμε να φιλιόμαστε δεν θα μπορούμε να σταματήσουμε;",
-  "Ποια είναι η μεγαλύτερη απόδειξη έλξης που έχεις δει από κάποιον προς εσένα;",
-  "Έχεις ποτέ νιώσει ότι κάποιος σε θέλει τόσο πολύ που σχεδόν σε φοβίζει η ένταση;",
-  "Ποιο είναι το πιο όμορφο κοπλιμέντο που σου έχουν κάνει για το σώμα σου;",
-  "Έχεις ποτέ σκεφτεί να κάνεις μια έκπληξη με εσώρουχα ή κάτι πολύ αποκαλυπτικό;",
-  "Ποια είναι η γνώμη σου για τα φιλιά με πάθος που αφήνουν τα χείλη πρησμένα;",
-  "Έχεις ποτέ νιώσει ότι ένα άγγιγμα στο χέρι ήταν πιο ερωτικό από ένα ολόκληρο φιλί;",
-  "Ποιο είναι το πιο σκοτεινό ή μυστηριώδες πράγμα που σε ελκύει στον άλλον;",
-  "Έχεις ποτέ θελήσει να πάρεις τον απόλυτο έλεγχο και να μην αφήσεις τον άλλον να κουνηθεί;",
-  "Ποιο είναι το πιο έντονο σημείο που θα ήθελες να εξερευνήσουμε απόψε;",
-  "Έχεις ποτέ σκεφτεί τι θα συνέβαινε αν κλειδωνόμασταν σε ένα δωμάτιο για 12 ώρες;",
-  "Ποια είναι η πιο βαθιά σου επιθυμία που δεν έχεις τολμήσει ποτέ να εκφράσεις με λόγια;",
-  "Έχεις ποτέ νιώσει ότι ένα βλέμμα μπορεί να σου γδύσει την ψυχή;",
-  "Ποιο είναι το πιο τολμηρό πράγμα που σου περνάει από το μυαλό αυτή ακριβώς τη στιγμή;",
-  "Έχεις ποτέ ευχηθεί να μπορούσες να παγώσεις τον χρόνο σε μια πολύ ερωτική στιγμή;",
-  "Ποια είναι η αγαπημένη σου λεπτομέρεια στο πρόσωπό μου όταν χαμογελάω πονηρά;",
-  "Έχεις ποτέ νιώσει ότι η χημεία μας είναι κάτι που δεν μπορεί να εξηγηθεί λογικά;",
-  "Ποιο είναι το επόμενο βήμα που θα ήθελες να κάνουμε μόλις τελειώσει αυτό το παιχνίδι;"
+  "Έχεις σκεφτεί ποτέ πώς θα ήταν να μας πιάσουν στα πράσα;"
 ];
 
-// 300 ΔΟΚΙΜΑΣΙΕΣ ΘΑΡΡΟΥΣ (Dares)
+// 150+ ΔΟΚΙΜΑΣΙΕΣ ΘΑΡΡΟΥΣ (Dares)
 const dares = [
   "Κλείσε τα μάτια σου: θα σε φιλήσω σε 3 διαφορετικά σημεία του σώματός σου και πρέπει να μαντέψεις ποια ήταν.",
   "Βγάλε μου ένα κομμάτι ρούχου χρησιμοποιώντας αποκλειστικά και μόνο τα δόντια σου.",
@@ -775,56 +693,7 @@ const dares = [
   "Φίλησέ με στο στήθος μέσα από το ύφασμα της μπλούζας μου.",
   "Άσε με να σου αγγίξω τους γοφούς και να σε σηκώσω ελαφρά ψηλά.",
   "Κάθισε απέναντί μου και κάνε μια παύση 30 δευτερολέπτων κοιτώντας μόνο τα χείλη μου.",
-  "Δάγκωσε απαλά το δάχτυλό μου και κοίταξέ με στα μάτια.",
-  "Άσε με να σου δώσω 10 γρήγορα και παθιασμένα φιλιά στον λαιμό.",
-  "Βάλε το χέρι σου στο στήθος μου κάτω από τα ρούχα και νιώσε την καρδιά μου.",
-  "Φίλησέ με στο πίσω μέρος του λαιμού ενώ έχω γυρισμένη την πλάτη μου σε σένα.",
-  "Άσε με να σου χαϊδέψω τα πόδια ξεκινώντας από τον αστράγαλο μέχρι το γόνατο.",
-  "Κάνε μου μια αγκαλιά τόσο σφιχτή που να μην μπορούμε να πάρουμε ανάσα για 20 δευτερόλεπτα.",
-  "Βγάλε ένα ρούχο σου και φόρεσέ το ανάποδα.",
-  "Φίλησέ με στην άκρη των χειλιών χωρίς να αγγίξεις το κέντρο τους.",
-  "Άσε με να σου περάσω τα χέρια μου μέσα από το παντελόνι στη μέση (χωρίς να μπω μέσα).",
-  "Κάθισε στα πόδια μου και ψιθύρισέ μου τι θέλεις να σου κάνω μετά το παιχνίδι.",
-  "Δώσε μου ένα αργό, υγρό φιλί στον λαιμό ακριβώς πίσω από το αυτί.",
-  "Άσε με να σου κρατήσω τα χέρια πίσω από την πλάτη σου όσο σε κοιτάζω.",
-  "Βγάλε ένα ρούχο μου χρησιμοποιώντας μόνο τα πόδια σου.",
-  "Φίλησέ με στην παλάμη του χεριού μου και μετά κλείσε τα δάχτυλά μου πάνω στο φιλί σου.",
-  "Άσε με να σου αγγίξω τη σπονδυλική στήλη με ένα παγάκι για 10 δευτερόλεπτα.",
-  "Κάνε μου ένα αισθησιακό μασάζ στο κεφάλι για 1 λεπτό.",
-  "Βάλε τα πόδια σου πάνω στα δικά μου και άσε με να σου κάνω μασάζ στις γάμπες.",
-  "Φίλησέ με με ανοιχτά μάτια χωρίς να ανοιγοκλείσεις τα βλέφαρά σου καθόλου.",
-  "Άσε με να σου ξεκουμπώσω ένα ακόμα κουμπί.",
-  "Κάθισε στο πάτωμα ανάμεσα στα πόδια μου και γείρε το κεφάλι σου πίσω στους μηρούς μου.",
-  "Δώσε μου 3 δαγκωματιές: μία στο χείλος, μία στο αυτί και μία στον ώμο.",
-  "Άσε με να σου περάσω τα χείλη μου πάνω από τα ρούχα σου στα πιο ευαίσθητα σημεία.",
-  "Βγάλε το ένα παπούτσι και την μία κάλτσα σου και μείνε έτσι.",
-  "Φίλησέ με στο κολάρο του λαιμού και τράβηξε απαλά το δέρμα με τα χείλη σου.",
-  "Άσε με να σου αγγίξω το πρόσωπο με κλειστά μάτια και να σου περιγράψω τι νιώθω.",
-  "Κάνε μου ένα αργό πέρασμα με τα νύχια σου στο μπράτσο μου.",
-  "Βάλε το χέρι μου κάτω από τη μπλούζα σου στην πλάτη και άσε με να σε χαϊδέψω.",
-  "Φίλησέ με σαν να είμαστε σε ταινία και είναι η σκηνή του αποχωρισμού.",
-  "Άσε με να σου πάρω το κινητό και να στείλω ένα spicy emoji στον εαυτό μου.",
-  "Κάθισε απέναντί μου και άνοιξε τα κουμπιά της μπλούζας σου μέχρι τη μέση.",
-  "Δώσε μου ένα φιλί στο σημείο που ενώνεται ο λαιμός με τον ώμο.",
-  "Άσε με να σου περάσω ένα δάχτυλο αργά κατά μήκος του κάτω χείλους σου.",
-  "Βγάλε ένα ρούχο σου και πέτα το πάνω μου.",
-  "Φίλησέ με στην κοιλιά ακριβώς κάτω από το στομάχι.",
-  "Άσε με να σου κρατήσω το κεφάλι με τα δύο μου χέρια και να σε φιλήσω βαθιά.",
-  "Κάνε μου μια εξομολόγηση για το τι σκέφτηκες την πρώτη φορά που με είδες γυμνό/ή.",
-  "Βάλε τα χέρια σου κάτω από τους μηρούς μου και σήκωσέ τους ελαφρά.",
-  "Φίλησέ με στα δάχτυλα του χεριού ένα προς ένα.",
-  "Άσε με να σου δαγκώσω απαλά το σαγόνι.",
-  "Κάθισε μπρούμυτα και άσε με να σου κάνω μασάζ στη μέση με αργές κινήσεις.",
-  "Δώσε μου ένα φιλί διάρκειας 20 δευτερολέπτων χωρίς να χρησιμοποιήσεις καθόλου γλώσσα.",
-  "Άσε με να σου χαϊδέψω το εσωτερικό του μπράτσου με τα ακροδάχτυλά μου.",
-  "Βγάλε ένα ρούχο μου που επιλέγεις εσύ.",
-  "Φίλησέ με στο στήθος ακριβώς πάνω από το ρούχο με ένταση.",
-  "Άσε με να σου ψιθυρίσω στο αυτί ποιο ρούχο σου θέλω να βγάλεις πρώτο.",
-  "Κάνε μου ένα αργό χάδι από το γόνατο μέχρι τη μέση πάνω από το παντελόνι.",
-  "Βάλε τα χέρια σου στο πίσω μέρος του λαιμού μου και φέρε με κοντά σου.",
-  "Φίλησέ με με τόσο πάθος που να μας κοπεί η ανάσα.",
-  "Άσε με να σε αγκαλιάσω και να μείνουμε ακίνητοι για 30 δευτερόλεπτα νιώθοντας την επαφή.",
-  "Κάνε ό,τι θέλεις εσύ πάνω μου για τα επόμενα 45 δευτερόλεπτα χωρίς να μιλήσεις."
+  "Δάγκωσε απαλά το δάχτυλό μου και κοίταξέ με στα μάτια."
 ];
 
 // STATE MANAGEMENT
@@ -835,11 +704,29 @@ let currentMode = null;
 let availableTruths = [];
 let availableDares = [];
 let drawnCount = 0;
+const totalCards = truths.length + dares.length;
 
 // TIMER STATE
 let timerInterval = null;
 let timerInitialSeconds = 0;
 let timerRemainingSeconds = 0;
+
+// CACHED DOM ELEMENTS (για αποφυγή περιττού reflow & DOM lookups)
+const dom = {
+  setupScreen: document.getElementById('setup-screen'),
+  gameScreen: document.getElementById('game-screen'),
+  turnBadge: document.getElementById('turn-badge'),
+  cardArea: document.getElementById('card-area'),
+  cardType: document.getElementById('card-type'),
+  cardText: document.getElementById('card-text'),
+  choiceButtons: document.getElementById('choice-buttons'),
+  actionButtons: document.getElementById('action-buttons'),
+  stats: document.getElementById('stats'),
+  timerContainer: document.getElementById('timer-container'),
+  timerDisplay: document.getElementById('timer-display'),
+  timerStatus: document.getElementById('timer-status'),
+  btnTimerStart: document.getElementById('btn-timer-start')
+};
 
 // HAPTIC FEEDBACK HELPER
 function triggerHaptic(duration = 60) {
@@ -852,8 +739,14 @@ function triggerHaptic(duration = 60) {
   }
 }
 
+// Αλγόριθμος Fisher-Yates για πραγματικά τυχαίο ανακάτεμα
 function shuffle(array) {
-  return [...array].sort(() => Math.random() - 0.5);
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
 }
 
 function startGame() {
@@ -863,14 +756,11 @@ function startGame() {
   round = 1;
   drawnCount = 0;
 
-  const setupScreen = document.getElementById('setup-screen');
-  const gameScreen = document.getElementById('game-screen');
-
-  setupScreen.style.display = 'none';
-  gameScreen.style.display = 'flex';
-  gameScreen.classList.remove('screen-enter');
-  void gameScreen.offsetWidth;
-  gameScreen.classList.add('screen-enter');
+  dom.setupScreen.style.display = 'none';
+  dom.gameScreen.style.display = 'flex';
+  dom.gameScreen.classList.remove('screen-enter');
+  void dom.gameScreen.offsetWidth; // Trigger reflow
+  dom.gameScreen.classList.add('screen-enter');
 
   updateTurnUI();
 }
@@ -879,34 +769,31 @@ function goToHome() {
   clearInterval(timerInterval);
   timerInterval = null;
 
-  const setupScreen = document.getElementById('setup-screen');
-  const gameScreen = document.getElementById('game-screen');
-
-  gameScreen.style.display = 'none';
-  setupScreen.style.display = 'flex';
-  setupScreen.classList.remove('screen-enter');
-  void setupScreen.offsetWidth;
-  setupScreen.classList.add('screen-enter');
+  dom.gameScreen.style.display = 'none';
+  dom.setupScreen.style.display = 'flex';
+  dom.setupScreen.classList.remove('screen-enter');
+  void dom.setupScreen.offsetWidth; // Trigger reflow
+  dom.setupScreen.classList.add('screen-enter');
 }
 
 function updateTurnUI() {
   clearInterval(timerInterval);
   timerInterval = null;
-  document.getElementById('timer-container').style.display = 'none';
+  dom.timerContainer.style.display = 'none';
 
   const activePlayer = players[currentTurn];
-  document.getElementById('turn-badge').innerText = `Σειρά σου, ${activePlayer}!`;
-  document.getElementById('stats').innerText = `Γύρος: ${round} | Κάρτες: ${drawnCount}/600`;
+  dom.turnBadge.innerText = `Σειρά σου, ${activePlayer}!`;
+  dom.stats.innerText = `Γύρος: ${round} | Κάρτες: ${drawnCount}/${totalCards}`;
   
   // Reset card area
-  document.getElementById('card-type').innerText = "Επίλεξε";
-  document.getElementById('card-type').style.color = "var(--text-muted)";
-  document.getElementById('card-text').innerText = "Αντέχεις την Αλήθεια ή προτιμάς το Θάρρος;";
-  document.getElementById('card-area').style.borderColor = "rgba(255, 255, 255, 0.1)";
+  dom.cardType.innerText = "Επίλεξε";
+  dom.cardType.style.color = "var(--text-muted)";
+  dom.cardText.innerText = "Αντέχεις την Αλήθεια ή προτιμάς το Θάρρος;";
+  dom.cardArea.style.borderColor = "rgba(255, 255, 255, 0.1)";
   
   // Show choices, hide actions
-  document.getElementById('choice-buttons').style.display = 'flex';
-  document.getElementById('action-buttons').style.display = 'none';
+  dom.choiceButtons.style.display = 'flex';
+  dom.actionButtons.style.display = 'none';
 }
 
 function extractSeconds(text) {
@@ -927,55 +814,45 @@ function setupTimerForText(text) {
   clearInterval(timerInterval);
   timerInterval = null;
   
-  const container = document.getElementById('timer-container');
-  const statusEl = document.getElementById('timer-status');
-  const displayEl = document.getElementById('timer-display');
-  const startBtn = document.getElementById('btn-timer-start');
-
-  statusEl.classList.remove('timer-ended-pulse');
-  statusEl.style.display = 'none';
-  displayEl.classList.remove('ended');
+  dom.timerStatus.classList.remove('timer-ended-pulse');
+  dom.timerStatus.style.display = 'none';
+  dom.timerDisplay.classList.remove('ended');
 
   const detectedSeconds = extractSeconds(text);
   if (detectedSeconds && detectedSeconds > 0) {
     timerInitialSeconds = detectedSeconds;
     timerRemainingSeconds = detectedSeconds;
     updateTimerDisplay(timerRemainingSeconds);
-    startBtn.innerText = 'Έναρξη';
-    container.style.display = 'flex';
+    dom.btnTimerStart.innerText = 'Έναρξη';
+    dom.timerContainer.style.display = 'flex';
   } else {
-    container.style.display = 'none';
+    dom.timerContainer.style.display = 'none';
   }
 }
 
 function updateTimerDisplay(seconds) {
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
-  document.getElementById('timer-display').innerText = 
+  dom.timerDisplay.innerText = 
     `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
 
 function toggleTimer() {
-  const startBtn = document.getElementById('btn-timer-start');
-  const statusEl = document.getElementById('timer-status');
-  const displayEl = document.getElementById('timer-display');
-
   if (timerInterval) {
-    // Παύση
     clearInterval(timerInterval);
     timerInterval = null;
-    startBtn.innerText = 'Συνέχεια';
+    dom.btnTimerStart.innerText = 'Συνέχεια';
     return;
   }
 
   if (timerRemainingSeconds <= 0) {
     timerRemainingSeconds = timerInitialSeconds;
-    statusEl.classList.remove('timer-ended-pulse');
-    statusEl.style.display = 'none';
-    displayEl.classList.remove('ended');
+    dom.timerStatus.classList.remove('timer-ended-pulse');
+    dom.timerStatus.style.display = 'none';
+    dom.timerDisplay.classList.remove('ended');
   }
 
-  startBtn.innerText = 'Παύση';
+  dom.btnTimerStart.innerText = 'Παύση';
 
   timerInterval = setInterval(() => {
     timerRemainingSeconds--;
@@ -984,12 +861,10 @@ function toggleTimer() {
     if (timerRemainingSeconds <= 0) {
       clearInterval(timerInterval);
       timerInterval = null;
-      startBtn.innerText = 'Έναρξη';
-      displayEl.classList.add('ended');
-      statusEl.classList.add('timer-ended-pulse');
-      
-      // Δόνηση 1 δευτερόλεπτο όταν μηδενίσει
-      triggerHaptic(1000);
+      dom.btnTimerStart.innerText = 'Έναρξη';
+      dom.timerDisplay.classList.add('ended');
+      dom.timerStatus.classList.add('timer-ended-pulse');
+      triggerHaptic(500);
     }
   }, 1000);
 }
@@ -1000,16 +875,13 @@ function resetTimer() {
   timerRemainingSeconds = timerInitialSeconds;
   updateTimerDisplay(timerRemainingSeconds);
   
-  const statusEl = document.getElementById('timer-status');
-  const displayEl = document.getElementById('timer-display');
-  statusEl.classList.remove('timer-ended-pulse');
-  statusEl.style.display = 'none';
-  displayEl.classList.remove('ended');
-  document.getElementById('btn-timer-start').innerText = 'Έναρξη';
+  dom.timerStatus.classList.remove('timer-ended-pulse');
+  dom.timerStatus.style.display = 'none';
+  dom.timerDisplay.classList.remove('ended');
+  dom.btnTimerStart.innerText = 'Έναρξη';
 }
 
 function drawCard(type) {
-  // Haptic feedback στο πάτημα (ίδιο και για τις 2 κάρτες)
   triggerHaptic(60);
 
   currentMode = type;
@@ -1018,31 +890,29 @@ function drawCard(type) {
   if (type === 'truth') {
     if (availableTruths.length === 0) availableTruths = shuffle(truths);
     text = availableTruths.pop();
-    document.getElementById('card-type').innerText = "Αλήθεια";
-    document.getElementById('card-type').style.color = "var(--accent-truth-glow)";
-    document.getElementById('card-area').style.borderColor = "var(--accent-truth)";
+    dom.cardType.innerText = "Αλήθεια";
+    dom.cardType.style.color = "var(--accent-truth-glow)";
+    dom.cardArea.style.borderColor = "var(--accent-truth)";
   } else {
     if (availableDares.length === 0) availableDares = shuffle(dares);
     text = availableDares.pop();
-    document.getElementById('card-type').innerText = "Θάρρος";
-    document.getElementById('card-type').style.color = "var(--accent-dare-glow)";
-    document.getElementById('card-area').style.borderColor = "var(--accent-dare)";
+    dom.cardType.innerText = "Θάρρος";
+    dom.cardType.style.color = "var(--accent-dare-glow)";
+    dom.cardArea.style.borderColor = "var(--accent-dare)";
   }
 
   drawnCount++;
 
-  // Smooth pop animation
-  const cardArea = document.getElementById('card-area');
-  cardArea.style.transform = "scale(0.95)";
+  dom.cardArea.style.transform = "scale(0.96)";
   setTimeout(() => {
-    document.getElementById('card-text').innerText = text;
-    cardArea.style.transform = "scale(1)";
+    dom.cardText.innerText = text;
+    dom.cardArea.style.transform = "scale(1)";
     setupTimerForText(text);
-  }, 120);
+  }, 100);
 
-  document.getElementById('choice-buttons').style.display = 'none';
-  document.getElementById('action-buttons').style.display = 'flex';
-  document.getElementById('stats').innerText = `Γύρος: ${round} | Κάρτες: ${drawnCount}/600`;
+  dom.choiceButtons.style.display = 'none';
+  dom.actionButtons.style.display = 'flex';
+  dom.stats.innerText = `Γύρος: ${round} | Κάρτες: ${drawnCount}/${totalCards}`;
 }
 
 function skipCard() {
@@ -1062,6 +932,7 @@ function nextTurn() {
   updateTurnUI();
 }
 
+// Εγγραφή Service Worker
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
